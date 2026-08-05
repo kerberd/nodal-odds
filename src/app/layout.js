@@ -10,7 +10,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-base text-gray-100 font-mono">
+      <body className="min-h-screen bg-white text-ink font-sans antialiased">
         <Navbar />
         <main>{children}</main>
       </body>
