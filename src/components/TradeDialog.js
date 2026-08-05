@@ -10,18 +10,24 @@ export default function TradeDialog({ market, onClose }) {
   const [error, setError] = useState('');
   const supabase = createClient();
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) {
       setError('Enter a valid amount.');
       return;
     }
+
+    const entryPrice = side === 'YES' ? market.yesPrice : 100 - market.yesPrice;
+    if (!entryPrice || entryPrice <= 0) {
+      setError('This side is priced at 0¢ and cannot be traded right now.');
+      return;
+    }
+
     setSubmitting(true);
     setError('');
 
     const { data: userData } = await supabase.auth.getUser();
-    const entryPrice = side === 'YES' ? market.yesPrice : 100 - market.yesPrice;
 
     const { error: insertError } = await supabase.from('positions').insert({
       user_id: userData.user.id,
