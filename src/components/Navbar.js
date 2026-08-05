@@ -28,10 +28,11 @@ export default function Navbar() {
           ● NODAL ODDS
         </Link>
         {user ? (
-          <div className="flex items-center gap-6 text-sm text-gray-400">
-            <Link href="/markets" className="hover:text-accent">MARKETS</Link>
-            <Link href="/watchlist" className="hover:text-accent">WATCHLIST</Link>
-            <Link href="/paper-trading" className="hover:text-accent">PAPER TRADING</Link>
+          <div className="flex items-center gap-6 text-sm text-muted">
+            <Link href="/dashboard" className="hover:text-ink transition-colors">Dashboard</Link>
+            <Link href="/markets" className="hover:text-ink transition-colors">Markets</Link>
+            <Link href="/watchlist" className="hover:text-ink transition-colors">Watchlist</Link>
+            <Link href="/paper-trading" className="hover:text-ink transition-colors">Paper Trading</Link>
           </div>
         ) : (
           <div className="flex items-center gap-6 text-sm text-gray-400">
