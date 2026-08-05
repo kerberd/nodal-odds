@@ -1,11 +1,47 @@
 'use client';
 
+import { useState } from 'react';
+import { createClient } from '@/lib/supabase-browser';
+import TradeDialog from './TradeDialog';
+
 function formatVolume(v) {
+  if (v >= 1000000) return `$${(v / 1000000).toFixed(1)}M`;
   if (v >= 1000) return `$${(v / 1000).toFixed(1)}K`;
   return `$${v.toFixed(0)}`;
 }
 
-export default function MarketCard({ market }) {
+export default function MarketCard({ market, isFavorited, onFavoriteChange, isSignedIn }) {
+  const [saving, setSaving] = useState(false);
+  const [showTrade, setShowTrade] = useState(false);
+  const supabase = createClient();
+
+  const toggleFavorite = async () => {
+    if (!isSignedIn) {
+      window.location.href = '/sign-in';
+      return;
+    }
+    setSaving(true);
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user.id;
+
+    if (isFavorited) {
+      await supabase
+        .from('watchlist')
+        .delete()
+        .eq('user_id', userId)
+        .eq('market_id', market.id);
+    } else {
+      await supabase.from('watchlist').insert({
+        user_id: userId,
+        market_id: market.id,
+        question: market.question,
+        image: market.image,
+      });
+    }
+    setSaving(false);
+    onFavoriteChange?.();
+  };
+
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-panel">
       <div className="h-40 bg-base flex items-center justify-center relative">
@@ -21,6 +57,13 @@ export default function MarketCard({ market }) {
             <span>MARKET</span>
           </div>
         )}
+        <button
+          onClick={toggleFavorite}
+          disabled={saving}
+          className="absolute top-2 left-2 bg-panel/90 w-7 h-7 rounded border border-border flex items-center justify-center text-sm"
+        >
+          {isFavorited ? '★' : '☆'}
+        </button>
         <span className="absolute top-2 right-2 bg-panel/90 text-[10px] px-2 py-1 rounded border border-border">
           POLYMARKET
         </span>
@@ -39,7 +82,17 @@ export default function MarketCard({ market }) {
             <div className="font-bold tabular-nums">{formatVolume(market.volume)}</div>
           </div>
         </div>
+        <button
+          onClick={() => (isSignedIn ? setShowTrade(true) : (window.location.href = '/sign-in'))}
+          className="w-full border border-border rounded py-2 text-xs font-semibold text-accent"
+        >
+          ⇄ PAPER TRADE
+        </button>
       </div>
+
+      {showTrade && (
+        <TradeDialog market={market} onClose={() => setShowTrade(false)} />
+      )}
     </div>
   );
 }
