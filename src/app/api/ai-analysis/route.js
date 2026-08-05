@@ -45,7 +45,7 @@ Explain what this price and volume suggest, staying strictly within the rules ab
     if (!response.ok) {
       const errText = await response.text();
       console.error('Gemini error:', errText);
-      return NextResponse.json({ error: 'AI analysis unavailable.' }, { status: 200 });
+      return NextResponse.json({ error: 'AI analysis unavailable.', debug: errText }, { status: 200 });
     }
 
     const data = await response.json();
