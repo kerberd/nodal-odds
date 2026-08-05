@@ -54,10 +54,11 @@ export default function MarketsPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {markets.slice(0, visibleCount).map((m) => (
+       {markets.slice(0, visibleCount).map((m, i) => (
           <MarketCard
             key={m.id}
             market={m}
+            index={i}
             isFavorited={favoritedIds.has(m.id)}
             isSignedIn={isSignedIn}
             onFavoriteChange={async () => {
