@@ -2,11 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import MarketCard from '@/components/MarketCard';
+import { createClient } from '@/lib/supabase-browser';
 
 export default function MarketsPage() {
   const [markets, setMarkets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(12);
+  const [favoritedIds, setFavoritedIds] = useState(new Set());
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const supabase = createClient();
+
+  const loadFavorites = async (userId) => {
+    const { data } = await supabase
+      .from('watchlist')
+      .select('market_id')
+      .eq('user_id', userId);
+    setFavoritedIds(new Set((data || []).map((row) => row.market_id)));
+  };
 
   useEffect(() => {
     fetch('/api/markets')
@@ -16,6 +28,13 @@ export default function MarketsPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setIsSignedIn(true);
+        loadFavorites(data.user.id);
+      }
+    });
   }, []);
 
   return (
@@ -36,7 +55,16 @@ export default function MarketsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {markets.slice(0, visibleCount).map((m) => (
-          <MarketCard key={m.id} market={m} />
+          <MarketCard
+            key={m.id}
+            market={m}
+            isFavorited={favoritedIds.has(m.id)}
+            isSignedIn={isSignedIn}
+            onFavoriteChange={async () => {
+              const { data } = await supabase.auth.getUser();
+              if (data.user) loadFavorites(data.user.id);
+            }}
+          />
         ))}
       </div>
 
