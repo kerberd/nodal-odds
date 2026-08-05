@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
-  const { question, yesPrice, volume, category } = await req.json();
+  const { question, yesPrice, volume } = await req.json();
 
   const systemPrompt = `You are a neutral prediction-market analyst. You will be given a market question, its current price, and trading volume — nothing else.
 
@@ -19,31 +19,38 @@ Current YES price: ${yesPrice}%
 Explain what this price and volume suggest, staying strictly within the rules above.`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.4,
-        max_tokens: 220,
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: systemPrompt }],
+          },
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: userPrompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 220,
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('OpenAI error:', errText);
+      console.error('Gemini error:', errText);
       return NextResponse.json({ error: 'AI analysis unavailable.' }, { status: 200 });
     }
 
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content?.trim() || 'AI analysis unavailable.';
+    const text =
+      data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'AI analysis unavailable.';
 
     return NextResponse.json({ analysis: text });
   } catch (err) {
