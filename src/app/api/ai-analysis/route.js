@@ -53,8 +53,7 @@ Explain what this price and volume suggest, staying strictly within the rules ab
       data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'AI analysis unavailable.';
 
     return NextResponse.json({ analysis: text });
-  } catch (err) {
+ } catch (err) {
     console.error('AI analysis error:', err);
-    return NextResponse.json({ error: 'AI analysis unavailable.' }, { status: 200 });
+    return NextResponse.json({ error: 'AI analysis unavailable.', debug: err.message }, { status: 200 });
   }
-}
