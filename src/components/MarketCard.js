@@ -17,6 +17,8 @@ export default function MarketCard({ market, isFavorited, onFavoriteChange, isSi
   const [analysis, setAnalysis] = useState(null);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const supabase = createClient();
+  const animatedPrice = useCountUp(market.yesPrice ?? 0, 800);
+  const animatedVolume = useCountUp(market.volume ?? 0, 900);
 
   const toggleFavorite = async () => {
     if (!isSignedIn) {
