@@ -33,6 +33,9 @@ export default function PaperTradingPage() {
               ? live.yesPrice
               : 100 - live.yesPrice
             : pos.entry_price;
+        if (!pos.entry_price || pos.entry_price <= 0) {
+          return { ...pos, livePrice, currentValue: pos.amount, pnl: 0, invalid: true };
+        }
         const shares = pos.amount / (pos.entry_price / 100);
         const currentValue = shares * (livePrice / 100);
         const pnl = currentValue - pos.amount;
