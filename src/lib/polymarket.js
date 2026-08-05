@@ -12,8 +12,13 @@ export async function fetchTopMarkets(limit = 200) {
 
   const data = await res.json();
 
+  const seen = new Set();
   return data
-    .filter((m) => Number(m.volumeNum) >= 5000)
+    .filter((m) => {
+      if (seen.has(m.id)) return false;
+      seen.add(m.id);
+      return Number(m.volumeNum) >= 5000;
+    })
     .map((m) => {
       let yesPrice = null;
       try {
