@@ -1,4 +1,8 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase-browser';
 
 const steps = [
   {
@@ -19,6 +23,23 @@ const steps = [
 ];
 
 export default function HomePage() {
+  const [checking, setChecking] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        window.location.href = '/markets';
+      } else {
+        setChecking(false);
+      }
+    });
+  }, [supabase]);
+
+  if (checking) {
+    return <div className="px-8 py-24 text-gray-500">Loading…</div>;
+  }
+
   return (
     <div>
       <section className="px-8 py-24 max-w-4xl">
