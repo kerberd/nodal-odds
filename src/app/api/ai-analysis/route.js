@@ -57,3 +57,4 @@ Explain what this price and volume suggest, staying strictly within the rules ab
     console.error('AI analysis error:', err);
     return NextResponse.json({ error: 'AI analysis unavailable.', debug: err.message }, { status: 200 });
   }
+}
