@@ -13,6 +13,8 @@ function formatVolume(v) {
 export default function MarketCard({ market, isFavorited, onFavoriteChange, isSignedIn }) {
   const [saving, setSaving] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
+  const [analysis, setAnalysis] = useState(null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const supabase = createClient();
 
   const toggleFavorite = async () => {
@@ -40,6 +42,26 @@ export default function MarketCard({ market, isFavorited, onFavoriteChange, isSi
     }
     setSaving(false);
     onFavoriteChange?.();
+  };
+
+  const getAnalysis = async () => {
+    setLoadingAnalysis(true);
+    try {
+      const res = await fetch('/api/ai-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: market.question,
+          yesPrice: market.yesPrice,
+          volume: market.volume,
+        }),
+      });
+      const data = await res.json();
+      setAnalysis(data.analysis || data.error || 'AI analysis unavailable.');
+    } catch (err) {
+      setAnalysis('AI analysis unavailable.');
+    }
+    setLoadingAnalysis(false);
   };
 
   return (
@@ -82,12 +104,30 @@ export default function MarketCard({ market, isFavorited, onFavoriteChange, isSi
             <div className="font-bold tabular-nums">{formatVolume(market.volume)}</div>
           </div>
         </div>
+
         <button
           onClick={() => (isSignedIn ? setShowTrade(true) : (window.location.href = '/sign-in'))}
-          className="w-full border border-border rounded py-2 text-xs font-semibold text-accent"
+          className="w-full border border-border rounded py-2 text-xs font-semibold text-accent mb-2"
         >
           ⇄ PAPER TRADE
         </button>
+
+        {!analysis && (
+          <button
+            onClick={getAnalysis}
+            disabled={loadingAnalysis}
+            className="w-full border border-border rounded py-2 text-xs font-semibold text-accent"
+          >
+            {loadingAnalysis ? 'Generating…' : '✧ AI ANALYSIS'}
+          </button>
+        )}
+
+        {analysis && (
+          <div className="mt-3 border border-border rounded p-3 bg-base">
+            <div className="text-[10px] text-accent font-semibold mb-2">✧ AI ANALYSIS</div>
+            <p className="text-xs text-gray-300 leading-relaxed">{analysis}</p>
+          </div>
+        )}
       </div>
 
       {showTrade && (
