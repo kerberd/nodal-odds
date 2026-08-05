@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase-browser';
+import { useCountUp } from '@/hooks/useCountUp';
 import TradeDialog from './TradeDialog';
 
 function formatVolume(v) {
