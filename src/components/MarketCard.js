@@ -78,7 +78,7 @@ export default function MarketCard({ market, isFavorited, onFavoriteChange, isSi
           <img
             src={market.image}
             alt=""
-            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105 p-2"
           />
         ) : (
           <div className="text-gray-400 text-xs flex flex-col items-center gap-2">
